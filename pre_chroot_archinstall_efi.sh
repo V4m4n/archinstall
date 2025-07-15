@@ -22,8 +22,8 @@ echo "[*] Make fstab"
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "[*] Copy the in_chroot.sh to the new system"
-cp in_chroot.sh /mnt/root/in_chroot.sh
-chmod +x /mnt/root/in_chroot.sh
+cp in_chroot.sh /mnt/in_chroot.sh
+chmod +x /mnt/in_chroot.sh
 
 echo
 echo "[*] Okayyyyy, You have done the first step. Now run these following command:"
