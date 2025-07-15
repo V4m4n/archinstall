@@ -29,10 +29,11 @@ swapon /swapfile -p 100
 echo "/swapfile none swap defaults,pri=100 0 0" >> /etc/fstab
 
 echo "[*] Install systemd-boot"
-bootctl install
+bootctl --path=/boot/efi install
 
 echo "[*] Make loader.conf"
-cat <<EOF > /boot/loader/loader.conf
+mkdir -p /boot/efi/loader/entries
+cat <<EOF > /boot/efi/loader/loader.conf
 default arch.conf
 timeout 3
 editor 0
@@ -40,12 +41,13 @@ EOF
 
 echo "[*] Boot entry"
 PARTUUID=$(blkid -s PARTUUID -o value /dev/sda4)
-cat <<EOF > /boot/loader/entries/arch.conf
+cat <<EOF > /boot/efi/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-options root=PARTUUID=xxxx rw resume=/swapfile
+options root=PARTUUID=$PARTUUID rw resume=/swapfile
 EOF
+
 
 echo "[*] Make a user to use"
 read -p "Name: " Vaman # Change your user name
@@ -59,6 +61,9 @@ EDITOR=nano visudo
 
 echo "[*] Install some network tools"
 pacman -S --noconfirm dhcpcd dhclient usbmuxd inetutils
+
+echo "[*] swapoff the swapfile"
+swapoff /swapfile
 
 echo "[*] Okayy, done"
 echo "Run these following command:"
