@@ -1,380 +1,324 @@
 # Arch Linux + Hyprland Installation Tutorial
 
-<style>
-code {
-    background-color: #2d3748;
-    color: #63b3ed;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    font-weight: 500;
-    border: 1px solid #4a5568;
-}
-
-pre code {
-    color: #e2e8f0;
-    border: none;
-    padding: 0;
-}
-
-blockquote {
-    border-left: 4px solid #4299e1;
-    padding: 12px 16px;
-    margin: 16px 0;
-    border-radius: 4px;
-}
-
-.warning {
-    border-left-color: #f56565;
-    background-color: #fed7d7;
-}
-
-.info {
-    border-left-color: #48bb78;
-    background-color: #c6f6d5;
-}
-
-h1, h2, h3 {
-    color: #2482a7ff;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 8px;
-}
-
-h1 {
-    border-bottom-color: #4299e1;
-}
-
-h2 {
-    border-bottom-color: #63b3ed;
-    margin-top: 32px;
-}
-
-h3 {
-    color: #FFFFFF;
-    border-bottom-color: #90cdf4;
-    margin-top: 24px;
-}
-</style>
-
 **Author:** Vaman  
 **Date:** 2025-03-20
 
-> Dưới đây là hướng dẫn dual boot Arch Linux thủ công, sử dụng Hyprland trên ổ SSD rời, dành cho UEFI. Tôi viết file này với mục đích tìm hiểu về hệ điều hành, nên sẽ hơi dài.
+> This is a manual dual-boot Arch Linux installation guide using Hyprland on a separate SSD, designed for UEFI systems. I wrote this guide to understand the operating system better, so it will be somewhat lengthy.
 
 ---
-## Mục lục
+## Table of Contents
 
 <div class="toc">
 
-1. [**Chuẩn bị file ISO**](#1-chuẩn-bị-file-iso)
-   - Tải file ISO từ trang chủ
-   - Mount file ISO
+1. [**Prepare ISO File**](#1-prepare-iso-file)
+   - Download ISO file from official website
+   - Mount ISO file
 
-2. [**Chuẩn bị ổ ssd rời và phân vùng**](#2-chuẩn-bị-ổ-ssd-rời-và-phân-vùng)
-   - Sử dụng Disk Management
-   - Sử dụng Command Line
+2. [**Prepare Separate SSD and Partitioning**](#2-prepare-separate-ssd-and-partitioning)
+   - Using Disk Management
+   - Using Command Line
 
-3. [**Đưa dữ liệu vào phân vùng**](#3-đưa-dữ-liệu-vào-phân-vùng)
+3. [**Copy Data to Partition**](#3-copy-data-to-partition)
 
-4. [**Đặt lại định dạng là EFI**](#4-đặt-lại-định-dạng-là-efi)
-   - Cấu hình EFI System Partition
-   - Xử lý lỗi GPT/MBR
+4. [**Set Partition Type to EFI**](#4-set-partition-type-to-efi)
+   - Configure EFI System Partition
+   - Handle GPT/MBR errors
 
-5. [**Boot vào arch linux**](#5-boot-vào-arch-linux)
-   - Cấu hình UEFI/BIOS
-   - Tắt Secure Boot và Fast Boot
+5. [**Boot into Arch Linux**](#5-boot-into-arch-linux)
+   - Configure UEFI/BIOS
+   - Disable Secure Boot and Fast Boot
 
-6. [**Cài đặt hệ điều hành**](#6-cài-đặt-hệ-điều-hành-mới-thông-qua-arch-vừa-boot-vào)
-   - Xác định ổ SSD
-   - Tạo bảng phân vùng
-   - Format và Mount phân vùng
+6. [**Install Operating System**](#6-install-operating-system-through-booted-arch)
+   - Identify SSD drive
+   - Create partition table
+   - Format and mount partitions
 
-7. [**Cài Hệ Thống Cơ Bản**](#7-cài-hệ-thống-cơ-bản)
+7. [**Install Base System**](#7-install-base-system)
    - Base system installation
-   - Tạo fstab
-   - Chroot vào hệ thống
+   - Create fstab
+   - Chroot into system
 
-8. [**Cấu Hình Hệ Thống**](#8-cấu-hình-hệ-thống)
-   - Thiết lập múi giờ
-   - Cấu hình locale
-   - Đặt hostname và password
+8. [**System Configuration**](#8-system-configuration)
+   - Set timezone
+   - Configure locale
+   - Set hostname and password
 
-9. [**Cài Đặt Bootloader**](#9-cài-đặt-bootloader-cho-hệ-thống-uefi)
+9. [**Install Bootloader**](#9-install-bootloader-for-uefi-system)
    - Systemd-boot installation
-   - Cấu hình boot entries
+   - Configure boot entries
 
-10. [**Tạo user**](#10-tạo-user)
-    - Tạo tài khoản người dùng
-    - Cấu hình sudo permissions
+10. [**Create User**](#10-create-user)
+    - Create user account
+    - Configure sudo permissions
 
-11. [**Hoàn Tất Cài Đặt**](#11-hoàn-tất-cài-đặt)
-    - Cleanup và reboot
+11. [**Complete Installation**](#11-complete-installation)
+    - Cleanup and reboot
 
-12. [**Cài Đặt và Cấu Hình Hyprland**](#12-cài-đặt-và-cấu-hình-hyprland)
-    - Cài đặt Hyprland
-    - Cấu hình terminal và launcher
-    - Khởi động desktop environment
+12. [**Install and Configure Hyprland**](#12-install-and-configure-hyprland)
+    - Install Hyprland
+    - Configure terminal and launcher
+    - Start desktop environment
 
-13. [**Tóm Tắt và Lưu Ý**](#13-tóm-tắt-và-lưu-ý)
+13. [**Summary and Notes**](#13-summary-and-notes)
 
 </div>
 
 ---
 
-## 1. Chuẩn bị file ISO
+## 1. Prepare ISO File
 
-### Tải file ISO từ trang chủ của arch linux
-- Click vào [đây](https://archlinux.org/download/).
-- Kéo xuống dưới và chọn một phiên bản(ở đây mình chọn phiên bản đầu tiên `geo.mirror.pkgbuild.com` có thể chọn phiên bản khác).
+### Download ISO file from Arch Linux official website
+- Click [here](https://archlinux.org/download/).
+- Scroll down and select a mirror (here I choose the first one `geo.mirror.pkgbuild.com`, you can choose another mirror).
 
-### Mount file ISO
-- Click vào chuột phải chọn `mount`.
+### Mount ISO file
+- Right-click and select `mount`.
 
 ---
 
-## 2. Chuẩn bị ổ ssd rời và phân vùng
+## 2. Prepare Separate SSD and Partitioning
 
-- Kiểm tra kích thước của ổ đĩa quang vừa xuất hiện.
+- Check the size of the optical drive that just appeared.
     
-    ví dụ: kích thước ổ quang của mình là `999MB`. Vậy thì mình sẽ tạo một phân vùng `1024MB`(1GB).
+    Example: my optical drive size is `999MB`. So I will create a partition of `1024MB` (1GB).
     
-- Tạo một **Simple Volume** mới có kích thước **1024MB**, định dạng **FAT32** và gán nhãn **ISO**.
+- Create a new **Simple Volume** with size **1024MB**, format **FAT32** and label **ISO**.
 
-### Cách 1: Sử dụng Disk Management
+### Method 1: Using Disk Management
 
-1. **Ấn `Win + X`, Chọn `Disk Management`**
+1. **Press `Win + X`, Select `Disk Management`**
     
-    Nếu có thông báo hỏi chọn `MBR` hay `GPT`, hãy chọn `GPT`
+    If prompted to choose `MBR` or `GPT`, select `GPT`
 
-2. **Chọn ổ đĩa SSD rời**
+2. **Select the separate SSD drive**
     
-    > ⚠️ **Lưu ý:** Chọn đúng ổ ssd rời.
+    > ⚠️ **Warning:** Select the correct separate SSD.
 
-3. **Tạo Simple Volume mới**
-   - Tạo phân vùng mới với **1024MB**:
+3. **Create new Simple Volume**
+   - Create new partition with **1024MB**:
      
-     Chuột phải vào vùng ổ đĩa đang trống chọn new simple volume
+     Right-click on the empty disk space and select "New Simple Volume"
      
-     Nhập kích thước `1024MB`
+     Enter size `1024MB`
      
-   - Chọn file system là FAT32
-   - Nhập Volume label là ISO
+   - Choose file system as FAT32
+   - Enter Volume label as ISO
 
 ![Disk Management](https://www.itechguides.com/wp-content/uploads/2024/04/Disk-Management-formats-a-USB-drive-with-the-NTFS-file-system-by-default.-If-you-wish-to-format-your-drive-with-the-FAT32-file-system-select-this-option-on-the-Format-Partition-page-of-the-wizard.webp)
 
-**Hoàn tất tạo volume mới**
+**Complete creating new volume**
 
-### Cách 2: Sử dụng Command Line
+### Method 2: Using Command Line
 
 <details>
-<summary>Chi tiết</summary>
-Ngoài ra cũng có thể thực hiện những thao tác trên thông qua cmd:
+<summary>Details</summary>
+You can also perform the above operations through cmd:
 
-1. **Mở cmd bằng quyền admin**
+1. **Open cmd with admin privileges**
 
-2. **Mở diskpart**
+2. **Open diskpart**
    ```bash
    diskpart
    ```
 
-3. **Xem danh sách ổ cứng**
+3. **List drives**
    ```bash
    list disk
    ```
 
-4. **Chọn ổ đĩa**
+4. **Select disk**
    ```bash
    sel disk x
    ```
-   x ở đây là số thứ tự ổ đĩa của bạn
+   x here is your disk number
    
-   > ⚠️ **Lưu ý:** Chọn đúng ổ đĩa để tránh làm mất dữ liệu
+   > ⚠️ **Warning:** Select the correct disk to avoid data loss
 
-5. **Tạo với kích thước là 1024MB**
+5. **Create partition with size 1024MB**
    ```bash
    create partition primary size=1024
    ```
 
-6. **Xem danh sách phân vùng**
+6. **List partitions**
    ```bash
    list part
    ```
 
-7. **Chọn phân vùng vừa tạo**
+7. **Select newly created partition**
    ```bash
    sel part x
    ```
-   x ở đây là số thứ tự phân vùng của bạn
+   x here is your partition number
    
-   > ⚠️ **Lưu ý:** Chọn đúng phân vùng để tránh làm mất dữ liệu
+   > ⚠️ **Warning:** Select the correct partition to avoid data loss
 
-8. **Định dạng phân vùng thành FAT32 và đặt nhãn là ISO**
+8. **Format partition as FAT32 and set label as ISO**
    ```bash
    format fs=fat32 label=ISO quick
    ```
-    Có thể thay đổi nhãn theo ý muốn
+    You can change the label as desired
 
-9. **Đặt tên phân vùng là F**
+9. **Assign drive letter F**
    ```bash
    assign letter=F
    ```
-    Có thể chọn letter khác
+    You can choose another letter
 
-10. **Thoát diskpart**
+10. **Exit diskpart**
     ```bash
     exit
     ```
 
 </details>
 
-> ⚠️ **Lưu ý:**
-> - **Chọn đúng ổ đĩa (`sel disk`) để tránh mất dữ liệu!**
-> - **Nếu chưa quen thao tác thì vẫ nên sử dụng `Disk Management` sẽ an toàn hơn**
+> ⚠️ **Warning:**
+> - **Select the correct disk (`sel disk`) to avoid data loss!**
+> - **If you're not familiar with these operations, using `Disk Management` is safer**
 
 ---
 
-## 3. Đưa dữ liệu vào phân vùng
+## 3. Copy Data to Partition
 
-- Mở ổ quang xuất hiện khi `mount` file ISO.
-- `Copy` toàn bộ sau đó `paste` vào phân vùng mới tạo.
-- Sau đó có thể eject ổ quang vừa mount bằng cách click chuột phải chọn eject.
+- Open the optical drive that appeared when you `mounted` the ISO file.
+- `Copy` everything and then `paste` into the newly created partition.
+- You can then eject the optical drive by right-clicking and selecting eject.
 
 ---
 
-## 4. Đặt lại định dạng là EFI
+## 4. Set Partition Type to EFI
 
-1. **Mở cmd bằng quyền admin**
+1. **Open cmd with admin privileges**
 
-2. **Mở diskpart**
+2. **Open diskpart**
    ```bash
    diskpart
    ```
 
-3. **Xem danh sách ổ cứng**
+3. **List drives**
    ```bash
    list disk
    ```
 
-4. **Chọn ổ đĩa của**
+4. **Select your disk**
    ```bash
    sel disk x
    ```
-   x ở đây là số thứ tự ổ đĩa của bạn
+   x here is your disk number
 
-5. **Xem danh sách phân vùng**
+5. **List partitions**
    ```bash
    list part
    ```
 
-6. **Chọn phân vùng vừa copy paste ổ quang vào**
+6. **Select the partition where you copied the optical drive data**
    ```bash
    sel part x
    ```
-   x ở đây là số thứ tự phân vùng của bạn
+   x here is your partition number
 
-7. **Gõ lệnh**
+7. **Type command**
    ```bash
    help setid
    ```
 
-8. **Tìm EFI System partition ID**
-   - Kéo lên trên tìm dòng `EFI System partition:`
-   - Sẽ thấy một dòng mã như này: `c12a7328-f81f-11d2-ba4b-00a0c93ec93b`
-   - copy đoạn mã đó và gõ lệnh
+8. **Find EFI System partition ID**
+   - Scroll up to find the line `EFI System partition:`
+   - You'll see a code line like: `c12a7328-f81f-11d2-ba4b-00a0c93ec93b`
+   - Copy that code and type the command
    
    ```bash
    set id=<your_id>
    ```
-   thay thế `<your_id>` bằng đoạn mã vừa lấy được 
+   replace `<your_id>` with the code you just got
    
-   **Ví dụ:**
+   **Example:**
    ```bash
    set id=c12a7328-f81f-11d2-ba4b-00a0c93ec93b
    ```
 
-9. **Xử lý lỗi (nếu có)**
-   - Nếu thành công sẽ có thông báo
-   - Trong trường hợp nếu gặp lỗi thì nên kiểm tra xem bảng phân vùng của có phải là gpt không hay là mbr bằng cách gõ lại lệnh
+9. **Handle errors (if any)**
+   - If successful, you'll get a notification
+   - In case of errors, check if your partition table is GPT or MBR by typing again
    
    ```bash
    list disk
    ```
    
-   - Chú ý ổ cứng có phải là gpt không, nếu không thì hãy gõ lệnh
+   - Check if your drive is GPT, if not, type the command
    
    ```bash
    convert gpt
    ```
    
-   - Sau đó thực hiện lại.
+   - Then repeat the process.
 
 ---
 
-## 5. Boot vào arch linux
+## 5. Boot into Arch Linux
 
-> 💡 **Thông tin:** `BIOS` và `UEFI` đều là các loại `firmware`. Các máy tính hiện đại sử dụng `UEFI` thay thế cho `BIOS` nhờ tính năng tiên tiến và hiệu suất vượt trội hơn.
+> 💡 **Information:** `BIOS` and `UEFI` are both types of `firmware`. Modern computers use `UEFI` instead of `BIOS` due to advanced features and superior performance.
 
-### Các bước thực hiện:
+### Steps to perform:
 
-1. **Khởi động lại máy, và ấn phím `f2` để vào `UEFI`**
-   - Với mỗi dòng máy thì sẽ khác, có thể là `f12`, `delete`, `esc`… 
-   - Hãy search phím tắt vào `UEFI` của dòng máy đang sử dụng trước
+1. **Restart the computer and press `F2` to enter `UEFI`**
+   - Different computer models use different keys, it could be `F12`, `Delete`, `Esc`...
+   - Search for the shortcut key to enter `UEFI` for your computer model beforehand
 
-   > ⚠️ **Lưu ý:** Hãy cẩn thận khi thao tác trong `UEFI` vì có thể gây lỗi nghiêm trọng tới máy. Chỉ nên thao tác với những cài đặt không gây nguy hiểm tới máy.
+   > ⚠️ **Warning:** Be careful when operating in `UEFI` as it can cause serious errors to your machine. Only operate with settings that are not dangerous to the machine.
 
-2. **Tắt `secure boot` và `fast boot`**
-   - `Fast boot` và `secure boot` thường nằm trong mục `BOOT` và `SECURITY`
+2. **Turn off `secure boot` and `fast boot`**
+   - `Fast boot` and `secure boot` are usually located in the `BOOT` and `SECURITY` sections
 
-3. **Tạo `boot option` mới**
-   - Đôi khi máy sẽ tự tạo thêm sau khi hoàn tất thao tác ở trên.
+3. **Create new `boot option`**
+   - Sometimes the machine will automatically create one after completing the above operations.
 
-4. **Boot vào `arch linux`**
-   - Chọn `arch linux` và `boot` vào.
+4. **Boot into `arch linux`**
+   - Select `arch linux` and `boot` into it.
 
 ---
 
-## 6. Cài đặt hệ điều hành mới thông qua arch vừa boot vào
+## 6. Install Operating System Through Booted Arch
 
-### 6.1. Xác định ổ SSD
+### 6.1. Identify SSD Drive
 
-Mở terminal và dùng lệnh:
+Open terminal and use command:
 
 ```bash
 lsblk -f
 ```
 
-Xác định tên ổ (ví dụ: `/dev/sda`).
+Identify the drive name (example: `/dev/sda`).
 
-> ⚠️ **Lưu ý:** Hãy xác định đúng để tránh mất dữ liệu
+> ⚠️ **Warning:** Identify correctly to avoid data loss
 
-### 6.2. Tạo bảng phân vùng
+### 6.2. Create Partition Table
 
-Dùng `cfdisk` để tạo bảng GPT trên ổ SSD:
+Use `cfdisk` to create GPT table on SSD:
 
 ```bash
 cfdisk /dev/sda
 ```
 
-#### Tạo phân vùng EFI (ESP): khoảng 300–512 MB, định dạng FAT32
+#### Create EFI (ESP) partition: about 300-512 MB, FAT32 format
 
-Đây là phân vùng chứa các file khởi động và bootloader. UEFI sẽ tìm đến thư mục này và khởi động hệ thống.
+This partition contains boot files and bootloader. UEFI will find this directory and boot the system.
 
-- Trong giao diện cfdisk, Sẽ thấy nhiều phân vùng. Dùng phím mũi tên để di chuyển đến phân vùng trống.
-- Chọn `New`.
-- Chọn kích thước: Nhập kích thước cho phân vùng EFI, ở đây mình nhập: `512M` (512MB).
-- Sau khi tạo xong, chọn phân vùng mới tạo (thường là `/dev/sda3`) và chọn `type`.
-- Chọn định dạng `EFI System Partition`(EF00).
+- In the cfdisk interface, you'll see multiple partitions. Use arrow keys to move to free space.
+- Select `New`.
+- Choose size: Enter size for EFI partition, here I enter: `512M` (512MB).
+- After creation, select the newly created partition (usually `/dev/sda3`) and select `type`.
+- Choose format `EFI System Partition`(EF00).
 
-#### Tạo phân vùng root: phần còn lại (dạng ext4)
+#### Create root partition: remaining space (ext4 format)
 
-- Sau khi tạo phân vùng EFI, trong phân vùng trống còn lại, nhấn `New` để tạo thêm một phân vùng mới.
-- Chọn kích thước: Có thể chọn toàn bộ không gian còn lại cho phân vùng root, bằng cách chọn toàn bộ hoặc nhập kích thước tùy ý.
-- Phân vùng này sẽ được dùng làm phân vùng chứa hệ thống Arch Linux.
-- Sau khi tạo xong, chọn phân vùng mới tạo (tạm gọi là `/dev/sda4` vì sda3 đã được dùng làm phân vùng EFI, hãy thay đổi tùy theo trường hợp) và chọn `type`.
-- Chọn định dạng `linux system` (thường là mặc định không cần phải chọn).
-- *(Tùy chọn)* Có thể tạo thêm phân vùng swap nếu cần.
+- After creating the EFI partition, in the remaining free space, press `New` to create another new partition.
+- Choose size: You can choose all remaining space for the root partition, by selecting all or entering the size as desired.
+- This partition will be used as the partition containing the Arch Linux system.
+- After creation, select the newly created partition (let's call it `/dev/sda4` since sda3 is already used for EFI partition, change according to your case) and select `type`.
+- Choose format `linux system` (usually default, no need to select).
+- *(Optional)* You can create additional swap partition if needed.
 
-### 6.3. Format phân vùng
+### 6.3. Format Partitions
 
 #### EFI:
 ```bash
@@ -386,19 +330,19 @@ mkfs.fat -F32 /dev/sda3
 mkfs.ext4 /dev/sda4
 ```
 
-### 6.4. Mount các phân vùng
+### 6.4. Mount Partitions
 
-1. **Đảm bảo đang ở thư mục root**
+1. **Ensure you're in root directory**
    ```bash
    cd /
    ```
 
-2. **Mount root vào `/mnt`:**
+2. **Mount root to `/mnt`:**
    ```bash
    mount /dev/sda4 /mnt
    ```
 
-3. **Tạo thư mục `boot` trong `/mnt` và mount phân vùng EFI vào đấy:**
+3. **Create `boot` directory in `/mnt` and mount EFI partition there:**
    ```bash
    mkdir /mnt/boot
    ```
@@ -408,33 +352,33 @@ mkfs.ext4 /dev/sda4
    ```
 
 
-> 💡 **Giải thích bước "set id" ở bước số 4:**
+> 💡 **Explanation of "set id" step from step 4:**
 > <details>
-> <summary>Chi tiết</summary>
+> <summary>Details</summary>
 >
-> Trước đó chúng ta đã dùng Diskpart để "set id" cho phân vùng. Việc này nhằm gán mã nhận diện (ID) cho phân vùng, giúp `BIOS/UEFI` nhận diện phân vùng đó là có khả năng boot (EFI System Partition). Nếu tạo phân vùng bằng Linux (vd: dùng `cfdisk`), ta sẽ đặt type là `EFI system partition` như bên trên, hai thao tác này tương tự nhau.
+> Previously we used Diskpart to "set id" for the partition. This assigns an identification code (ID) to the partition, helping `BIOS/UEFI` recognize that partition as bootable (EFI System Partition). If we create partitions using Linux (e.g., using `cfdisk`), we would set type as `EFI system partition` as above, these two operations are equivalent.
 >
 > </details>
 
 ---
 
-## 7. Cài Hệ Thống Cơ Bản
+## 7. Install Base System
 
-### 7.1. Cài đặt base system
+### 7.1. Install base system
 
-Sử dụng `pacstrap` để cài gói cơ bản:
+Use `pacstrap` to install base packages:
 
 ```bash
 pacstrap /mnt base linux linux-firmware
 ```
 
-### 7.2. Tạo file fstab
+### 7.2. Generate fstab file
 
 ```bash
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
-### 7.3. Chroot vào hệ thống mới cài
+### 7.3. Chroot into newly installed system
 
 ```bash
 arch-chroot /mnt
@@ -444,21 +388,21 @@ arch-chroot /mnt
 >
 > <details>
 >
-> <summary>Chi tiết</summary>
+> <summary>Details</summary>
 >
-> - Là một lệnh dùng để thay đổi thư mục root (/) của một tiến trình hoặc môi trường tạm thời.
-> - Hiểu nôm na thì chroot giúp "thay đổi góc nhìn" của hệ thống, biến một thư mục nào đó trở thành thư mục root đối với các lệnh bên trong nó.
-> - Điều này là cần thiết bởi vì arch hiện tại chúng ta đang dùng để cài đặt được gọi là phiên bản live (Arch live) được cấu hình sẵn dùng tạm thời để cài đặt một arch khác, có thể xóa arch live này sau khi hoàn tất cài đặt arch.
+> - A command used to temporarily change the root directory (/) of a process or environment.
+> - Simply put, chroot helps "change the perspective" of the system, making a directory become the root directory for commands inside it.
+> - This is necessary because the Arch we're currently using for installation is called a live version (Arch live) that's pre-configured for temporary use to install another Arch, you can delete this Arch live after completing the installation.
 >
 > </details>
 
 ---
 
-## 8. Cấu Hình Hệ Thống
+## 8. System Configuration
 
-### 8.1. Thiết lập múi giờ
+### 8.1. Set timezone
 
-(Ở đây mình dùng múi giờ Việt Nam)
+(Here I use Vietnam timezone)
 
 ```bash
 ln -sf /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
@@ -468,66 +412,66 @@ ln -sf /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
 hwclock --systohc
 ```
 
-### 8.2. Cấu hình locale
+### 8.2. Configure locale
 
-1. **Mở file `/etc/locale.gen` và bỏ comment dòng:**
+1. **Open file `/etc/locale.gen` and uncomment the line:**
    ```
    en_US.UTF-8 UTF-8
    ```
-   *(Hoặc nếu thích dùng locale Việt, hãy chọn vi_VN.UTF-8 nếu có NHƯNG ĐỪNG LÀM VẬY)*
+   *(Or if you prefer Vietnamese locale, choose vi_VN.UTF-8 if available BUT DON'T DO THAT)*
 
-2. **Sau đó chạy:**
+2. **Then run:**
    ```bash
    locale-gen
    ```
 
-3. **Tạo file `/etc/locale.conf`:**
+3. **Create file `/etc/locale.conf`:**
    ```bash
    echo "LANG=en_US.UTF-8" > /etc/locale.conf
    ```
 
-### 8.3. Đặt hostname
+### 8.3. Set hostname
 
-1. **Dùng lệnh**
+1. **Use command**
    ```bash
    echo "myarch" > /etc/hostname
    ```
 
-2. **Mở file `/etc/hosts` bằng nano hoặc vim.**
+2. **Open file `/etc/hosts` with nano or vim.**
    ```bash
    nano /etc/hosts
    ```
 
-3. **Và chỉnh sửa file `/etc/hosts`:**
+3. **Edit file `/etc/hosts`:**
    ```
    127.0.0.1   localhost
    ::1         localhost
    127.0.1.1   myarch.localdomain myarch
    ```
 
-### 8.4. Đặt mật khẩu cho root
+### 8.4. Set password for root
 
 ```bash
 passwd
 ```
 
-- Sau đó nhập để tạo password mới
+- Then enter to create new password
 
 ---
 
-## 9. Cài Đặt Bootloader (cho hệ thống UEFI)
+## 9. Install Bootloader (for UEFI system)
 
-**Ở đây mình dùng systemd-boot**
+**Here I use systemd-boot**
 
-### 9.1. Cài đặt systemd-boot
+### 9.1. Install systemd-boot
 
 ```bash
 bootctl --path=/boot install
 ```
 
-### 9.2. Tạo file loader
+### 9.2. Create loader file
 
-Tạo file `/boot/loader/loader.conf` với nội dung:
+Create file `/boot/loader/loader.conf` with content:
 
 ```
 default arch.conf
@@ -535,24 +479,24 @@ timeout 3
 editor 0
 ```
 
-### 9.3. Kiểm tra PARTUUID của phân vùng root
+### 9.3. Check PARTUUID of root partition
 
 ```bash
 blkid | grep sda4
 ```
 
-- Chụp lại hoặc nhớ PARTUUID của phân vùng
+- Copy or remember the PARTUUID of the partition
 
-> ⚠️ **Lưu ý:** Xác định đúng là PARTUUID chứ không phải UUID để tránh gặp lỗi. Có thể dùng UUID thay vì PARTUUID nhưng phải chính xác.
+> ⚠️ **Warning:** Make sure it's PARTUUID not UUID to avoid errors. You can use UUID instead of PARTUUID but must be accurate.
 
-### 9.4. Tạo file boot entry
+### 9.4. Create boot entry file
 
-1. **Tạo file `/boot/loader/entries/arch.conf`:**
+1. **Create file `/boot/loader/entries/arch.conf`:**
    ```bash
    nano /boot/loader/entries/arch.conf
    ```
 
-2. **Điền nội dung như sau:**
+2. **Fill in content as follows:**
    ```
    title   Arch Linux
    linux   /vmlinuz-linux
@@ -560,9 +504,9 @@ blkid | grep sda4
    options root=PARTUUID=<PARTUUID> rw
    ```
    
-   thay `<PARTUUID>` bằng PARTUUID của phân vùng root mới lấy được ở trên
+   replace `<PARTUUID>` with the PARTUUID of the root partition obtained above
 
-3. **Hoặc  cũng có thể dùng UUID**
+3. **Or you can also use UUID**
    ```
    title   Arch Linux
    linux   /vmlinuz-linux
@@ -572,23 +516,23 @@ blkid | grep sda4
 
 ---
 
-## 10. Tạo user
+## 10. Create User
 
-### 10.1. Tạo tài khoản người dùng thông thường
+### 10.1. Create regular user account
 
 ```bash
 useradd -m -G wheel -s /bin/bash your_username
 ```
 
-### 10.2. Tạo mật khẩu
+### 10.2. Create password
 
 ```bash
 passwd your_username
 ```
 
-Sau đó tạo mật khẩu mới của người dùng
+Then create new password for the user
 
-### 10.3. Cài đặt sudo
+### 10.3. Install sudo
 
 ```bash
 pacman -S sudo
@@ -598,68 +542,68 @@ pacman -S sudo
 EDITOR=nano visudo
 ```
 
-- Trong file visudo, kiểm tra coi dòng sau có bị comment không, không thì xóa comment nếu chưa có thì hãy thêm mới:
+- In the visudo file, check if the following line is commented, if not, uncomment it, if it doesn't exist, add it:
 
 ```
 %wheel ALL=(ALL:ALL) ALL
 ```
 
-> 💡 Thao tác này để cấp quyền sử dụng sudo cho người dùng wheel
+> 💡 This operation grants sudo usage rights to wheel users
 
 ---
 
-## 11. Hoàn Tất Cài Đặt
+## 11. Complete Installation
 
-### 11.1. Thoát khỏi chroot
+### 11.1. Exit chroot
 
 ```bash
 exit
 ```
 
-### 11.2. Unmount phân vùng
+### 11.2. Unmount partitions
 
 ```bash
 umount -R /mnt
 ```
 
-### 11.3. Khởi động lại hệ thống
+### 11.3. Restart system
 
 ```bash
 reboot
 ```
 
-- Vào `BIOS/UEFI`.
-- Lúc này máy của sẽ xuất hiện một boot option mới. Có thể sẽ bị trùng tên với boot option để vào arch live.
-- Boot vào option đấy
-- Nếu thấy đang ở root mà không yêu cầu login, hãy nhập
+- Enter `BIOS/UEFI`.
+- Now your machine will have a new boot option. It might have the same name as the boot option to enter arch live.
+- Boot into that option
+- If you see you're at root without requiring login, type
 
 ```bash
 su -
 ```
 
-- Sau đó nhập tên người dùng và mật khẩu của để đăng nhập
+- Then enter username and password to log in
 
 ---
 
-## 12. Cài Đặt và Cấu Hình Hyprland
+## 12. Install and Configure Hyprland
 
-Sau khi boot vào hệ thống Arch mới, tiến hành cài Hyprland.
+After booting into the new Arch system, proceed to install Hyprland.
 
-### 12.1. Cập nhật hệ thống
+### 12.1. Update system
 
 ```bash
 sudo pacman -Syu
 ```
 
-### 12.2. Cài đặt Hyprland
+### 12.2. Install Hyprland
 
-Kiểm tra xem Hyprland có sẵn trong repo chính không:
+Check if Hyprland is available in the main repo:
 
 ```bash
 sudo pacman -S hyprland wayland wlroots xorg-xwayland
 ```
 
-Nếu chưa có (trường hợp cần cài từ AUR), có thể cài một AUR helper như `yay`:
+If not available (case needs to install from AUR), you can install an AUR helper like `yay`:
 
 ```bash
 git clone https://aur.archlinux.org/yay.git
@@ -667,56 +611,56 @@ cd yay
 makepkg -si
 ```
 
-Sau đó:
+Then:
 
 ```bash
 sudo yay -S hyprland wayland wlroots xorg-xwayland
 ```
 
-### 12.3. Cài đặt một số ứng dụng hỗ trợ
+### 12.3. Install some supporting applications
 
-Ví dụ: terminal emulator, launcher, panel, v.v.
+For example: terminal emulator, launcher, panel, etc.
 
 ```bash
 sudo pacman -S alacritty wofi waybar
 ```
 
- có thể cài thêm các ứng dụng khác theo nhu cầu.
+You can install other applications as needed.
 
-### 12.4. Cấu hình Hyprland
+### 12.4. Configure Hyprland
 
-1. **Tạo thư mục cấu hình:**
+1. **Create configuration directory:**
    ```bash
    mkdir -p ~/.config/hypr
    ```
 
-2. **Copy file cấu hình mẫu:**
-   Nếu hệ thống đã cài file cấu hình mẫu (ví dụ: tại `/etc/xdg/hypr/hyprland.conf`), có thể copy về:
+2. **Copy sample configuration file:**
+   If the system has installed sample configuration file (e.g., at `/etc/xdg/hypr/hyprland.conf`), you can copy it:
    
    ```bash
    cp /etc/xdg/hypr/hyprland.conf ~/.config/hypr/hyprland.conf
    ```
    
-   Nếu không, có thể tự tạo file cấu hình.
+   If not, you can create your own configuration file.
 
-3. **Chỉnh sửa cấu hình:**
-   Mở file `~/.config/hypr/hyprland.conf` và thiết lập các keybinding, lệnh khởi chạy các ứng dụng…
+3. **Edit configuration:**
+   Open file `~/.config/hypr/hyprland.conf` and set up keybindings, application launch commands...
    
-   **Ví dụ:**
+   **Example:**
    ```
-   # Khởi chạy terminal với Super+Enter
+   # Launch terminal with Super+Enter
    bind = SUPER, Return, exec, alacritty
-   # Đóng cửa sổ với Super+Q
+   # Close window with Super+Q
    bind = SUPER, Q, killactive
    ```
    
-   Có thể thêm các dòng `exec` để khởi động các tiện ích như wofi, waybar, hoặc các dịch vụ khác nếu cần.
+   You can add `exec` lines to start utilities like wofi, waybar, or other services if needed.
 
-   > 💡 Hãy tìm hiểu về hyprland trước khi cài đặt
+   > 💡 Learn about Hyprland before installing
 
-### 12.5. Khởi động Hyprland
+### 12.5. Start Hyprland
 
-Đăng nhập và chạy lệnh:
+Log in and run command:
 
 ```bash
 Hyprland
@@ -724,14 +668,14 @@ Hyprland
 
 ---
 
-## 13. Tóm Tắt và Lưu Ý
+## 13. Summary and Notes
 
-- **Lưu ý:** Cẩn thận khi thao tác với `bootloader`, `BIOS/UEFI` và ổ cứng vì có thể ảnh hưởng đến hệ điều hành còn lại bạn đang dùng.
+- **Warning:** Be careful when operating with `bootloader`, `BIOS/UEFI` and drives as it can affect other operating systems you're using.
 
-- **Hệ thống tối giản:** Hướng dẫn trên cài đặt Arch Linux "tinh gọn" và sau đó cài Hyprland mà chưa cài đặt các công cụ cơ bản khác.
+- **Minimal system:** The above guide installs "minimal" Arch Linux and then installs Hyprland without installing other basic tools.
 
-- **Cấu hình Hyprland:** Tùy chỉnh file cấu hình Hyprland theo nhu cầu (keybindings, theme, ứng dụng khởi chạy,…). Có thể tham khảo [wiki Hyprland](https://wiki.hyprland.org/) để biết thêm chi tiết.
+- **Hyprland configuration:** Customize Hyprland configuration file according to your needs (keybindings, theme, startup applications...). You can refer to [Hyprland wiki](https://wiki.hyprland.org/) for more details.
 
 ---
 
-Nếu có bất kỳ thắc mắc hay vấn đề nào trong quá trình cài, người này có thể hỗ trợ, liên hệ với hỗ trợ viên tại [đây](https://chatgpt.com/).
+If you have any questions or issues during installation, you can get support by contacting support [here](https://chatgpt.com/).
