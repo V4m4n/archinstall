@@ -21,13 +21,6 @@ EOF
 echo "[*] Set root password"
 passwd
 
-echo "[*] Create swapfile (16GB, pri=100)"
-fallocate -l 16G /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-swapon /swapfile -p 100
-echo "/swapfile none swap defaults,pri=100 0 0" >> /etc/fstab
-
 echo "[*] Install systemd-boot"
 bootctl --path=/boot install
 
@@ -45,7 +38,7 @@ cat <<EOF > /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-options root=PARTUUID=$PARTUUID rw resume=/swapfile
+options root=PARTUUID=$PARTUUID rw
 EOF
 
 echo "[*] Create user"
@@ -61,9 +54,6 @@ EDITOR=nano visudo
 echo "[*] Install network tools"
 pacman -S --noconfirm dhcpcd dhclient usbmuxd inetutils
 systemctl enable dhcpcd
-
-echo "[*] Disable swap before reboot"
-swapoff /swapfile
 
 echo "[*] DONE! Now run:"
 echo "exit"
