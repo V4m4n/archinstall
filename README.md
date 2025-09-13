@@ -1,3 +1,7 @@
+# 📖 Please Read First
+
+Before using these scripts, make sure you carefully read the installation guide:  
+➡️ [arch_install.md](https://github.com/V4m4n/archinstall/blob/main/arch_install_turtorial.md)
 
 # ⚠️ WARNING: Scripts Are Not Finalized
 
